@@ -1,8 +1,8 @@
 /*
- * @(#)Compiler.java                       
- * 
+ * @(#)Compiler.java
+ *
  * Revisions and updates (c) 2022-2025 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -28,17 +28,32 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
+
 /**
  * The main driver class for the Triangle compiler.
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
 
+    private static class RunArgs {
+        /**
+         * The filename for the object program, normally obj.tam.
+         */
+        @Argument(alias = "objectName", description = "Output TAM object name", required = false)
+        static String objectName = "obj.tam";
+
+        @Argument(alias = "showTree", description = "Show AST", required = false)
+        static boolean showTree = false;
+
+        @Argument(alias = "folding", description = "Show tree after folding is complete", required = false)
+        static boolean folding = false;
+
+        @Argument(alias = "showTreeAfter", description = "Show tree after folding is complete", required = false)
+        static boolean showTreeAfter = false;
+    }
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -63,7 +78,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean isFolding, boolean showingTreeAfter) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -94,10 +109,15 @@ public class Compiler {
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
-			if (folding) {
+			if (isFolding) {
 				theAST.visit(new ConstantFolder());
+
 			}
-			
+
+            if(showingTreeAfter) {
+                drawer.draw(theAST);
+            }
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -121,33 +141,25 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+         RunArgs runArgs = new RunArgs();
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-objectName=outputfilename] [-tree] [-folding] [-showTreeAfter]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
+
+        Args.parseOrExit(runArgs, args);
+
+
 
 		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		var compiledOK = compileProgram(sourceName, runArgs.objectName, runArgs.showTree, false, runArgs.folding, runArgs.showTreeAfter);
+
+		if (!runArgs.showTree && !runArgs.showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+
+
 }
