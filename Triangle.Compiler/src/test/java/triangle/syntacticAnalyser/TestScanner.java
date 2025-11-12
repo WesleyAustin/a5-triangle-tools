@@ -53,7 +53,9 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+    @Test
+    public void testDoubleValueOp() { compileExpectSuccess("/testDoubleValueOp.tri"); }
 
 	@Test
 	public void testHiNewComment() {

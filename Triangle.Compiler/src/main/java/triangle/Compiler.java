@@ -156,7 +156,7 @@ public class Compiler {
 
 		var compiledOK = compileProgram(sourceName, runArgs.objectName, runArgs.showTree, false, runArgs.folding, runArgs.showTreeAfter);
 
-		if (!runArgs.showTree && !runArgs.showTreeAfter) {
+		if (!runArgs.showTree && !runArgs.showTreeAfter) { //Don't exit immediately if showing AST
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}

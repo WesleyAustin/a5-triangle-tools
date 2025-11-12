@@ -1,0 +1,8 @@
+let
+    var a: Integer
+in
+begin
+    a := 3;
+    a**;
+    a**;
+end

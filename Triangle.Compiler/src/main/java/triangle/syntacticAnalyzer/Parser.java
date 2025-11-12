@@ -289,13 +289,30 @@ public class Parser {
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
 			} else {
+                Vname vAST = parseRestOfVname(iAST);
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
+                //New a** operator -> a := a * 2
+                if (currentToken.kind == Token.Kind.OPERATOR && "**".equals(currentToken.spelling)) { //Check if token is an operator, and that the spelling is '**'
+                    acceptIt(); //consume **
+
+                    //Create 'a * 2' from pre-existing AST node types
+
+                    Operator multiply = new Operator("*", commandPos); //Node for '*' operator
+                    IntegerLiteral noTwo = new IntegerLiteral("2", commandPos); //Node for the integer literal, '2'
+                    Expression noTwoExpression = new IntegerExpression(noTwo, commandPos); //Convert integer literal to IntegerExpression
+                    Expression expressionAST = new VnameExpression(vAST, commandPos); //Convert 'a' to an Expression so it can be used in final binary expression
+                    BinaryExpression result = new BinaryExpression(expressionAST, multiply, noTwoExpression, commandPos); //Build full 'a * 2' expression
+
+                    finish(commandPos); //End of whole command
+                    commandAST = new AssignCommand(vAST, result, commandPos); //Create AST node that sets vAST ('a') to result
+                } else { //Otherwise, this isn't the new '**' so continue to parse as normal
+
+				    accept(Token.Kind.BECOMES);
+				    Expression eAST = parseExpression();
+				    finish(commandPos);
+				    commandAST = new AssignCommand(vAST, eAST, commandPos);
+			    }
+            }
 		}
 			break;
 
