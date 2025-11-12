@@ -57,6 +57,9 @@ public class TestScanner {
     @Test
     public void testDoubleValueOp() { compileExpectSuccess("/testDoubleValueOp.tri"); }
 
+    @Test
+    public void testLoopWhile() { compileExpectSuccess("/loopwhile.tri"); }
+
 	@Test
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");

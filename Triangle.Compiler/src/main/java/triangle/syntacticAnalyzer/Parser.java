@@ -332,6 +332,26 @@ public class Parser {
 		}
 			break;
 
+
+        case LOOP: { //While loop with condition tested in middle
+            acceptIt(); //Consume 'LOOP'
+
+            Command c1 = parseSingleCommand(); //Parse the first command (C1) in the loop; single statement or begin end block
+
+            accept(Token.Kind.WHILE); //Expect 'WHILE' token next, and consume
+            Expression e = parseExpression(); //Parse the WHILE condition expression
+
+            accept(Token.Kind.DO); // Expect 'DO' token next, and consume
+            Command c2 = parseSingleCommand(); //Parse C2, which will only run while E is true
+
+            Command whileBody = new SequentialCommand(c2, c1, commandPos); //C2, then C1 because after C1 has initially completed, it's effectively a while loop starting at C2 (followed by C1)
+            finish(commandPos);
+
+            Command whileLoop = new WhileCommand(e, whileBody, commandPos); //While E do C2, C1
+            commandAST = new SequentialCommand(c1, whileLoop, commandPos); //Final command AST
+
+        }
+            break;
 		case IF: {
 			acceptIt();
 			Expression eAST = parseExpression();
