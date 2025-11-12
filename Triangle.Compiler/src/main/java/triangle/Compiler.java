@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.StatsCounter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -53,6 +54,9 @@ public class Compiler {
 
         @Argument(alias = "showTreeAfter", description = "Show tree after folding is complete", required = false)
         static boolean showTreeAfter = false;
+
+        @Argument(alias = "showStats", description = "Show counts of CharacterExpressions and IntegerExpressions in program", required = false)
+        static boolean showStats = false;
     }
 	private static Scanner scanner;
 	private static Parser parser;
@@ -78,7 +82,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean isFolding, boolean showingTreeAfter) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean isFolding, boolean showingTreeAfter, boolean showingStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -117,6 +121,15 @@ public class Compiler {
             if(showingTreeAfter) {
                 drawer.draw(theAST);
             }
+            if(showingStats) {
+                StatsCounter stats = new StatsCounter();
+                theAST.visit(stats);
+                System.out.println("STATS\nIntegerExpression count: " +
+                                    stats.getIntegerExpressions() +
+                                    "\nCharacterExpression count: " +
+                                    stats.getCharacterExpressions()
+                                  );
+            }
 
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -144,7 +157,7 @@ public class Compiler {
          RunArgs runArgs = new RunArgs();
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-objectName=outputfilename] [-tree] [-folding] [-showTreeAfter]");
+			System.out.println("Usage: tc filename [-objectName=outputfilename] [-tree] [-folding] [-showTreeAfter] [-showStats]");
 			System.exit(1);
 		}
 
@@ -154,7 +167,7 @@ public class Compiler {
 
 		String sourceName = args[0];
 
-		var compiledOK = compileProgram(sourceName, runArgs.objectName, runArgs.showTree, false, runArgs.folding, runArgs.showTreeAfter);
+		var compiledOK = compileProgram(sourceName, runArgs.objectName, runArgs.showTree, false, runArgs.folding, runArgs.showTreeAfter, runArgs.showStats);
 
 		if (!runArgs.showTree && !runArgs.showTreeAfter) { //Don't exit immediately if showing AST
 			System.exit(compiledOK ? 0 : 1);
