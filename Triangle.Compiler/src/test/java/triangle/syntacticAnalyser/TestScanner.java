@@ -60,6 +60,12 @@ public class TestScanner {
     @Test
     public void testLoopWhile() { compileExpectSuccess("/loopwhile.tri"); }
 
+    @Test
+    public void testEmptyCurly() { compileExpectSuccess("/empty-curly.tri"); }
+
+    @Test
+    public void testCurly() { compileExpectSuccess("/while-curly.tri"); }
+
 	@Test
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");

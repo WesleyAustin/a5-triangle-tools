@@ -1,0 +1,13 @@
+! print out aaaaa
+
+let
+  var a : Integer
+in
+{
+  a := 0;
+  while a < 5 do
+  {
+    put('a');
+    a := a + 1;
+  }
+}

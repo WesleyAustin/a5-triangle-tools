@@ -373,9 +373,15 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
-
+        case LCURLY: {
+            acceptIt(); //Consume {
+            commandAST = parseCommand(); //Parse commands inside {}
+            accept(Token.Kind.RCURLY); //Consume }
+        }
+            break;
 		case SEMICOLON:
 		case END:
+        case RCURLY: //Required in case {} have no command inside to parse
 		case ELSE:
 		case IN:
 		case EOT:
